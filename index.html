@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVILLAGE CRIMINAL DATABASE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        /* ログイン画面のスタイル */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-container {
+            background: #111;
+            border: 2px solid #00ff00;
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            color: #00ff00;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .login-subtitle {
+            color: #008800;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 1.2rem;
+            border: 1px solid #333;
+            background: #000;
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #00ff00;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .login-button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .login-error {
+            color: #ff4444;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .header {
+            background: #000;
+            padding: 1rem;
+            border-bottom: 2px solid #00ff00;
+            text-align: center;
+        }
+
+        .system-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff00;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            animation: fineshake 0.3s ease-in-out infinite;
+        }
+
+        .criminal-text {
+            color: #ff0000;
+        }
+
+        @keyframes fineshake {
+            0%, 100% { 
+                transform: translateX(0) translateY(0);
+            }
+            5% { 
+                transform: translateX(-0.5px) translateY(-0.5px);
+            }
+            10% { 
+                transform: translateX(0.5px) translateY(0.5px);
+            }
+            15% { 
+                transform: translateX(-0.5px) translateY(0.5px);
+            }
+            20% { 
+                transform: translateX(0.5px) translateY(-0.5px);
+            }
+            25% { 
+                transform: translateX(-0.5px) translateY(-0.5px);
+            }
+            30% { 
+                transform: translateX(0.5px) translateY(0.5px);
+            }
+            35% { 
+                transform: translateX(-0.5px) translateY(0.5px);
+            }
+            40% { 
+                transform: translateX(0.5px) translateY(-0.5px);
+            }
+            45% { 
+                transform: translateX(-0.5px) translateY(-0.5px);
+            }
+            50% { 
+                transform: translateX(0.5px) translateY(0.5px);
+            }
+            55% { 
+                transform: translateX(-0.5px) translateY(0.5px);
+            }
+            60% { 
+                transform: translateX(0.5px) translateY(-0.5px);
+            }
+            65% { 
+                transform: translateX(-0.5px) translateY(-0.5px);
+            }
+            70% { 
+                transform: translateX(0.5px) translateY(0.5px);
+            }
+            75% { 
+                transform: translateX(-0.5px) translateY(0.5px);
+            }
+            80% { 
+                transform: translateX(0.5px) translateY(-0.5px);
+            }
+            85% { 
+                transform: translateX(-0.5px) translateY(-0.5px);
+            }
+            90% { 
+                transform: translateX(0.5px) translateY(0.5px);
+            }
+            95% { 
+                transform: translateX(-0.5px) translateY(0.5px);
+            }
+        }
+
+        .system-subtitle {
+            font-size: 0.9rem;
+            color: #008800;
+            letter-spacing: 1px;
+        }
+
+        .status-bar {
+            background: #111;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            font-size: 0.8rem;
+        }
+
+        .status-left {
+            color: #00ff00;
+        }
+
+        .status-right {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .eta-counter {
+            color: #ffff00;
+        }
+
+        .total-bounty {
+            color: #ff8800;
+            font-weight: bold;
+        }
+
+        .fame-button {
+            background: transparent;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 0.3rem 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            margin-left: 1rem;
+        }
+
+        .fame-button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .logout-button {
+            background: transparent;
+            color: #ff4444;
+            border: 1px solid #ff4444;
+            padding: 0.3rem 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            margin-left: 1rem;
+        }
+
+        .logout-button:hover {
+            background: #ff4444;
+            color: #000;
+        }
+
+        /* ボーナスタイム表示 */
+        .bonus-time-display {
+            background: #1a1a00;
+            border: 2px solid #ffff00;
+            padding: 1rem;
+            margin: 1rem;
+            text-align: center;
+            color: #ffff00;
+            animation: bonus-glow 2s ease-in-out infinite alternate;
+        }
+
+        .bonus-time-display.hidden {
+            display: none;
+        }
+
+        @keyframes bonus-glow {
+            from {
+                border-color: #ffff00;
+                box-shadow: 0 0 5px #ffff00;
+            }
+            to {
+                border-color: #ffaa00;
+                box-shadow: 0 0 15px #ffaa00;
+            }
+        }
+
+        .bonus-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .bonus-timer {
+            font-size: 1.5rem;
+            color: #ffaa00;
+            margin-bottom: 0.5rem;
+        }
+
+        .bonus-targets {
+            font-size: 0.9rem;
+            color: #ffff00;
+        }
+
+        .user-info {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: #111;
+            border: 1px solid #00ff00;
+            padding: 0.5rem 1rem;
+            color: #00ff00;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .search-section {
+            background: #111;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .graph-section {
+            background: #111;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .graph-label {
+            color: #00ff00;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .graph-container {
+            background: #000;
+            border: 1px solid #333;
+            padding: 1rem;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-label {
+            color: #00ff00;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem;
+            font-family: inherit;
+            font-size: 1rem;
+            border: 1px solid #333;
+            background: #000;
+            color: #00ff00;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00ff00;
+        }
+
+        .search-results {
+            margin-bottom: 2rem;
+        }
+
+        .results-header {
+            background: #111;
+            border: 1px solid #333;
+            padding: 1rem;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .suspect-record {
+            background: #0a0a0a;
+            border: 2px solid #333;
+            margin: 1rem 0;
+            user-select: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .suspect-record:hover {
+            border-color: #00ff00;
+        }
+
+        .suspect-record.capturing {
+            border-color: #ff0000;
+            background: #1a0000;
+        }
+
+        .suspect-record.bonus-active {
+            border-color: #ffff00;
+            background: #1a1a00;
+        }
+
+        .record-header {
+            background: #111;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .case-number {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .status-wanted {
+            color: #ff4444;
+            font-weight: bold;
+            border: 1px solid #ff4444;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .status-captured {
+            color: #444;
+            font-weight: bold;
+            border: 1px solid #444;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .status-bonus {
+            color: #ffff00;
+            font-weight: bold;
+            border: 1px solid #ffff00;
+            padding: 0.2rem 0.5rem;
+            animation: bonus-text-glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bonus-text-glow {
+            from {
+                color: #ffff00;
+                text-shadow: 0 0 5px #ffff00;
+            }
+            to {
+                color: #ffaa00;
+                text-shadow: 0 0 10px #ffaa00;
+            }
+        }
+
+        .record-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 120px 1fr 200px;
+            gap: 2rem;
+        }
+
+        .suspect-photo {
+            background: #222;
+            border: 1px solid #444;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .suspect-info {
+            color: #00ff00;
+        }
+
+        .info-field {
+            margin-bottom: 0.8rem;
+            display: flex;
+        }
+
+        .field-label {
+            color: #888;
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .field-value {
+            color: #00ff00;
+        }
+
+        .reward-section {
+            text-align: center;
+        }
+
+        .reward-label {
+            color: #888;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .reward-amount {
+            color: #ffff00;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid #ffff00;
+            padding: 1rem;
+            background: #111;
+        }
+
+        .reward-amount.bonus {
+            color: #ffaa00;
+            border-color: #ffaa00;
+            animation: bonus-reward-glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes bonus-reward-glow {
+            from {
+                box-shadow: 0 0 10px #ffaa00;
+            }
+            to {
+                box-shadow: 0 0 20px #ffaa00;
+            }
+        }
+
+        .capture-progress {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+            text-align: center;
+        }
+
+        .database-log {
+            background: #111;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .log-header {
+            color: #00ff00;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+        }
+
+        .log-entry {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-suspect {
+            color: #00ff00;
+        }
+
+        .log-stats {
+            color: #ffff00;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 800px) {
+            .record-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .suspect-photo {
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .reward-amount {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ログイン画面 -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-title">HVILLAGE <span class="criminal-text">CRIMINAL</span> DATABASE</div>
+            <div class="login-subtitle">ACCESS CONTROL SYSTEM</div>
+            <input type="password" id="passwordInput" class="login-input" placeholder="パスワードを入力してください" maxlength="10">
+            <button onclick="attemptLogin()" class="login-button">LOGIN</button>
+            <div id="loginError" class="login-error">パスワードが正しくありません</div>
+        </div>
+    </div>
+
+    <!-- メインシステム -->
+    <div id="mainSystem" class="hidden">
+        <div class="header">
+            <div class="system-title">HVILLAGE <span class="criminal-text">CRIMINAL</span> DATABASE</div>
+            <div class="system-subtitle">CRIMINAL INVESTIGATION SYSTEM v2.1</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-left">
+                SYSTEM STATUS: ONLINE | TIME: <span id="currentTime"></span> | ACCESS LEVEL: AUTHORIZED
+            </div>
+            <div class="status-right">
+                <div class="total-bounty">累計: <span id="totalAllTimeBounty">0</span>η</div>
+                <div class="eta-counter">今日: <span id="etaCount">0</span>η</div>
+                <button class="fame-button" onclick="toggleDatabase()">VIEW LOG</button>
+                <button class="logout-button" onclick="logout()">LOGOUT</button>
+            </div>
+        </div>
+
+        <!-- ボーナスタイム表示 -->
+        <div id="bonusTimeDisplay" class="bonus-time-display hidden">
+            <div class="bonus-title">⚡ BONUS TIME ACTIVE ⚡</div>
+            <div class="bonus-timer" id="bonusTimer">10:00</div>
+            <div class="bonus-targets">
+                Enhanced Bounties: <span id="bonusTargets">Loading...</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="search-section">
+                <div class="search-label">SUSPECT SEARCH QUERY:</div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Enter 6-digit code..." oninput="searchSuspect()" maxlength="6">
+            </div>
+
+            <div class="graph-section">
+                <div class="graph-label">η BOUNTY PROGRESSION:</div>
+                <div class="graph-container">
+                    <canvas id="bountyChart" width="800" height="200"></canvas>
+                </div>
+            </div>
+
+            <div id="searchResults" class="search-results hidden">
+                <div class="results-header">SEARCH RESULTS - SUSPECTS FOUND:</div>
+                <div id="suspectsList">
+                    <!-- 検索結果がここに表示される -->
+                </div>
+            </div>
+
+            <div id="databaseLog" class="database-log">
+                <div class="log-header">CAPTURE LOG - RECENT ACTIVITIES:</div>
+                <div id="captureLog">
+                    <!-- キャプチャログがここに表示される -->
+                </div>
+            </div>
+        </div>
+
+        <div id="captureProgress" class="capture-progress">
+            PROCESSING CAPTURE...<br>
+            <div style="margin-top: 1rem; font-size: 1rem;">HOLD TO CONFIRM</div>
+        </div>
+
+        <!-- ユーザー情報表示 -->
+        <div class="user-info">
+            ID: <span id="userCode">------</span>
+        </div>
+    </div>
+
+    <script>
+ // 参加者データ（新しいCSVデータ）
+        const suspects = [
+            { code: "854251", name: "さむ", alias: "祭りのさむ", building: "PAPRIKA", profession: "船長", reward: 320745, runTime: 8, password: "さむさむ", activity: "裏フェス開催してるぞオラ！！！！" },
+            { code: "166140", name: "なおき", alias: "風使いのなおき", building: "ROSEMARY", profession: "船長", reward: 322872, runTime: 7, password: "4477", activity: "屋久島の塩、バドミントン、クリケット" },
+            { code: "772893", name: "海老川舜悟🎖️", alias: "疾風の海老川舜悟", building: "BASIL", profession: "盗賊", reward: 385000, runTime: 6, password: "985", activity: "走りまくってる" },
+            { code: "523243", name: "こよ", alias: "蹴球のこよ", building: "PAPRIKA", profession: "船長", reward: 324362, runTime: 6.7, password: "Unlock", activity: "サッカー、勉強" },
+            { code: "924427", name: "あつし", alias: "筋肉のあつし", building: "BASIL", profession: "暗殺者", reward: 318085, runTime: 7.5, password: "1548", activity: "ゲーム" },
+            { code: "491658", name: "さとつば", alias: "重力超越のさとつば", building: "BASIL", profession: "戦士", reward: 313000, runTime: 8.5, password: "おれー", activity: "科学" },
+            { code: "287349", name: "マキシマム✴︎座✴︎FOX", alias: "甘詩のマキシマム✴︎座✴︎FOX", building: "ROSEMARY", profession: "暗殺者", reward: 316000, runTime: 8, password: "number0", activity: "映画" },
+            { code: "615720", name: "ゆうと", alias: "カタギのゆうと", building: "PAPRIKA", profession: "暗殺者", reward: 313000, runTime: 8.5, password: "カタギ", activity: "映画" },
+            { code: "893465", name: "花", alias: "闘球の花", building: "PAPRIKA", profession: "盗賊", reward: 305489, runTime: 9, password: "ばなな", activity: "バドミントン" },
+            { code: "208137", name: "はむ", alias: "白球のはむ", building: "BASIL", profession: "暗殺者", reward: 310000, runTime: 9, password: "1103", activity: "野球" },
+            { code: "572984", name: "のん", alias: "舞踊ののん", building: "TURMERIC", profession: "戦士", reward: 307000, runTime: 9.5, password: "ガールズしか勝たん", activity: "ダンス" },
+            { code: "746251", name: "りりん", alias: "音霊のりりん", building: "TURMERIC", profession: "戦士", reward: 305000, runTime: 10, password: "げんはしか勝たん", activity: "楽器" },
+            { code: "139678", name: "やふぁん", alias: "自由のやふぁん", building: "TURMERIC", profession: "盗賊", reward: 298085, runTime: 11, password: "女子しか勝たん", activity: "バイト" },
+            { code: "684529", name: "ゆーみ", alias: "絵語りのゆーみ", building: "TURMERIC", profession: "盗賊", reward: 295106, runTime: 11.5, password: "ターメリックしかかたん", activity: "バイト、野球" },
+            { code: "357940", name: "松井晶瑞", alias: "自由の松井晶瑞", building: "BASIL", profession: "盗賊", reward: 290000, runTime: 12.5, password: "Duckduckgo", activity: "バドミントン" },
+            { code: "821396", name: "き", alias: "賢者のき", building: "ROSEMARY", profession: "暗殺者", reward: 287234, runTime: 13, password: "ローズ", activity: "読書" },
+            { code: "472815", name: "鈴木煌之介", alias: "熱気風呂の鈴木煌之介", building: "ROSEMARY", profession: "盗賊", reward: 284255, runTime: 13.5, password: "626", activity: "ゲーム" },
+            { code: "698734", name: "リン", alias: "滑板のリン", building: "ROSEMARY", profession: "盗賊", reward: 281277, runTime: 14, password: "パスワード", activity: "バイト、映画" },
+            { code: "253910", name: "むーちゃん", alias: "空牙のむーちゃん", building: "ROSEMARY", profession: "盗賊", reward: 278298, runTime: 14.5, password: "Mugii0122", activity: "ゲーム" },
+            { code: "586147", name: "りょうた", alias: "蹴球のりょうた", building: "PAPRIKA", profession: "戦士", reward: 276213, runTime: 15, password: "あなるふぁっく", activity: "サッカー" },
+            { code: "794382", name: "石川 光歩", alias: "風矢の石川 光歩", building: "BASIL", profession: "剣士", reward: 272340, runTime: 15.5, password: "混血のカモシカ", activity: "映画" },
+            { code: "435976", name: "みん", alias: "ベトナムのみん", building: "BASIL", profession: "盗賊", reward: 268383, runTime: 16.5, password: "Vatine", activity: "バイト" },
+            { code: "169823", name: "りさ", alias: "雷光のりさ", building: "ROSEMARY", profession: "戦士", reward: 265404, runTime: 17, password: "514", activity: "テニス" },
+            { code: "324718", name: "えのあ", alias: "音霊のえのあ", building: "TURMERIC", profession: "策士", reward: 252660, runTime: 20, password: "zzz", activity: "楽器" },
+            { code: "591284", name: "野中智貴", alias: "自由の野中智貴", building: "BASIL", profession: "策士", reward: 247745, runTime: 21.5, password: "1234", activity: "ゲーム" },
+            { code: "836597", name: "つぐ", alias: "ビートメーカーのつぐ", building: "BASIL", profession: "船長", reward: 240872, runTime: 24, password: "GITS", activity: "サークル" },
+            { code: "479351", name: "こうや", alias: "雪風のこうや", building: "ROSEMARY", profession: "策士", reward: 230000, runTime: 30, password: "828", activity: "お酒" },
+            { code: "142865", name: "ゆうか", alias: "樹影のゆうか", building: "ROSEMARY", profession: "盗賊", reward: 108000, runTime: 100, password: "Yuka", activity: "ゲーム" },
+            { code: "618573", name: "のぶ", alias: "疾風ののぶ", building: "BASIL", profession: "船長", reward: 322872, runTime: 7, password: "525", activity: "走る" }
+        ];
+
+
+        const buildingInfo = {
+            "PAPRIKA": { emoji: "🌺", name: "PAPRIKA BLOCK" },
+            "ROSEMARY": { emoji: "🪻", name: "ROSEMARY BLOCK" },
+            "BASIL": { emoji: "🌿", name: "BASIL BLOCK" },
+            "TURMERIC": { emoji: "🌼", name: "TURMERIC BLOCK" },
+        };
+
+        let currentUser = null;
+        let capturedSuspects = {};
+        let totalBounty = 0;
+        let totalAllTimeBounty = 0;
+        let bountyHistory = [{ time: new Date().toLocaleTimeString(), bounty: 0 }];
+        let lastResetDate = null;
+        let longPressTimer = null;
+        let currentSuspect = null;
+        let bountyChart = null;
+
+        // ボーナスタイム関連
+        let bonusTimeActive = false;
+        let bonusTargets = [];
+        let bonusEndTime = null;
+        let bonusTimer = null;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+        });
+
+        // パスワード入力でEnterキーを押したときにログイン試行
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        attemptLogin();
+                    }
+                });
+            }
+        });
+
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainSystem();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        function attemptLogin() {
+            const password = document.getElementById('passwordInput').value;
+            const user = suspects.find(s => s.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showMainSystem();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('loginError').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showLoginScreen();
+        }
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainSystem').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function showMainSystem() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainSystem').classList.remove('hidden');
+            
+            // ユーザーコード表示
+            document.getElementById('userCode').textContent = currentUser.code;
+            
+            // データ初期化
+            initializeData();
+            updateTime();
+            setInterval(updateTime, 1000);
+            initBountyChart();
+            initBonusSystem();
+        }
+
+        function initializeData() {
+            checkDailyReset();
+            loadData();
+            updateBountyDisplay();
+            updateCaptureLog();
+        }
+
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const savedResetDate = localStorage.getItem('lastResetDate');
+            
+            if (savedResetDate !== today) {
+                // 24時間経過したのでリセット
+                const currentTotalBounty = parseInt(localStorage.getItem('totalBounty')) || 0;
+                const savedAllTimeBounty = parseInt(localStorage.getItem('totalAllTimeBounty')) || 0;
+                
+                // 今日のポイントを累計に加算
+                totalAllTimeBounty = savedAllTimeBounty + currentTotalBounty;
+                localStorage.setItem('totalAllTimeBounty', totalAllTimeBounty.toString());
+                
+                // 今日のポイントをリセット
+                capturedSuspects = {};
+                totalBounty = 0;
+                bountyHistory = [{ time: new Date().toLocaleTimeString(), bounty: 0 }];
+                
+                localStorage.setItem('capturedSuspects', JSON.stringify(capturedSuspects));
+                localStorage.setItem('totalBounty', totalBounty.toString());
+                localStorage.setItem('bountyHistory', JSON.stringify(bountyHistory));
+                localStorage.setItem('lastResetDate', today);
+                
+                lastResetDate = today;
+            }
+        }
+
+        function loadData() {
+            capturedSuspects = JSON.parse(localStorage.getItem('capturedSuspects')) || {};
+            totalBounty = parseInt(localStorage.getItem('totalBounty')) || 0;
+            totalAllTimeBounty = parseInt(localStorage.getItem('totalAllTimeBounty')) || 0;
+            bountyHistory = JSON.parse(localStorage.getItem('bountyHistory')) || [{ time: new Date().toLocaleTimeString(), bounty: 0 }];
+            lastResetDate = localStorage.getItem('lastResetDate');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0') + ' ' +
+                              String(now.getHours()).padStart(2, '0') + ':' + 
+                              String(now.getMinutes()).padStart(2, '0') + ':' + 
+                              String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function initBountyChart() {
+            const ctx = document.getElementById('bountyChart').getContext('2d');
+            bountyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: bountyHistory.map(item => item.time),
+                    datasets: [{
+                        label: 'η Bounty',
+                        data: bountyHistory.map(item => item.bounty),
+                        borderColor: '#00ff00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#00ff00',
+                                font: {
+                                    family: 'Courier New',
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#00ff00',
+                                font: {
+                                    family: 'Courier New',
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ボーナスシステム初期化
+        function initBonusSystem() {
+            // 初回ボーナスタイム設定（1分後に開始）
+            setTimeout(() => {
+                startBonusTime();
+                // 10分ごとにボーナスタイムを繰り返し
+                setInterval(startBonusTime, 20 * 60 * 1000); // 20分 = 10分ボーナス + 10分休憩
+            }, 60 * 1000);
+        }
+
+        function startBonusTime() {
+            bonusTimeActive = true;
+            bonusEndTime = new Date(Date.now() + 10 * 60 * 1000); // 10分後
+            
+            // ランダムに3人選択
+            const shuffled = [...suspects].sort(() => 0.5 - Math.random());
+            bonusTargets = shuffled.slice(0, 3).map(s => s.name);
+            
+            // UI更新
+            updateBonusDisplay();
+            document.getElementById('bonusTimeDisplay').classList.remove('hidden');
+            
+            // タイマー開始
+            bonusTimer = setInterval(updateBonusTimer, 1000);
+            
+            // 10分後に終了
+            setTimeout(endBonusTime, 10 * 60 * 1000);
+        }
+
+        function endBonusTime() {
+            bonusTimeActive = false;
+            bonusTargets = [];
+            bonusEndTime = null;
+            
+            if (bonusTimer) {
+                clearInterval(bonusTimer);
+                bonusTimer = null;
+            }
+            
+            document.getElementById('bonusTimeDisplay').classList.add('hidden');
+            
+            // 検索結果があれば更新
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput.value) {
+                searchSuspect();
+            }
+        }
+
+        function updateBonusTimer() {
+            if (!bonusTimeActive || !bonusEndTime) return;
+            
+            const now = new Date();
+            const timeLeft = bonusEndTime - now;
+            
+            if (timeLeft <= 0) {
+                endBonusTime();
+                return;
+            }
+            
+            const minutes = Math.floor(timeLeft / 60000);
+            const seconds = Math.floor((timeLeft % 60000) / 1000);
+            
+            document.getElementById('bonusTimer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateBonusDisplay() {
+            if (!bonusTimeActive) return;
+            
+            const targetNames = bonusTargets.map(name => {
+                const suspect = suspects.find(s => s.name === name);
+                return suspect ? suspect.alias : name;
+            }).join(', ');
+            
+            document.getElementById('bonusTargets').textContent = targetNames;
+        }
+
+        function isBonusTarget(suspectName) {
+            return bonusTimeActive && bonusTargets.includes(suspectName);
+        }
+
+        function updateBountyChart() {
+            const currentTime = new Date().toLocaleTimeString();
+            bountyHistory.push({ time: currentTime, bounty: totalBounty });
+            
+            // ローカルストレージに保存
+            localStorage.setItem('bountyHistory', JSON.stringify(bountyHistory));
+            
+            // グラフ更新
+            bountyChart.data.labels = bountyHistory.map(item => item.time);
+            bountyChart.data.datasets[0].data = bountyHistory.map(item => item.bounty);
+            bountyChart.update();
+        }
+
+        function searchSuspect() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const resultsSection = document.getElementById('searchResults');
+            const suspectsList = document.getElementById('suspectsList');
+
+            if (searchTerm.length === 0) {
+                resultsSection.classList.add('hidden');
+                return;
+            }
+
+            // 6桁コードで完全一致検索
+            const matchingSuspects = suspects.filter(s => 
+                s.code === searchTerm
+            );
+
+            if (matchingSuspects.length > 0) {
+                suspectsList.innerHTML = '';
+                matchingSuspects.forEach(suspect => {
+                    const suspectElement = createSuspectRecord(suspect);
+                    suspectsList.appendChild(suspectElement);
+                });
+                resultsSection.classList.remove('hidden');
+            } else {
+                resultsSection.classList.add('hidden');
+            }
+        }
+
+        function createSuspectRecord(suspect) {
+            const building = buildingInfo[suspect.building];
+            const captureCount = capturedSuspects[suspect.name] || 0;
+            
+            // 新しい報酬計算システム：0.75倍を回数分適用
+            let currentReward = Math.round(suspect.reward * Math.pow(0.75, captureCount));
+            
+            // ボーナスタイム中は1.5倍
+            const isBonus = isBonusTarget(suspect.name);
+            if (isBonus) {
+                currentReward = Math.round(currentReward * 1.5);
+            }
+            
+            const isWanted = captureCount === 0;
+
+            const recordDiv = document.createElement('div');
+            recordDiv.className = `suspect-record ${isBonus ? 'bonus-active' : ''}`;
+            recordDiv.innerHTML = `
+                <div class="record-header">
+                    <div class="case-number">CODE: ${suspect.code}</div>
+                    <div class="${isBonus ? 'status-bonus' : (isWanted ? 'status-wanted' : 'status-captured')}">
+                        ${isBonus ? '⚡ BONUS ⚡' : (isWanted ? 'WANTED' : 'CAPTURED')}
+                    </div>
+                </div>
+                <div class="record-content">
+                    <div class="suspect-photo">
+                        ${building.emoji}
+                    </div>
+                    <div class="suspect-info">
+                        <div class="info-field">
+                            <span class="field-label">ALIAS:</span>
+                            <span class="field-value">${suspect.alias}</span>
+                        </div>
+                        <div class="info-field">
+                            <span class="field-label">PROFESSION:</span>
+                            <span class="field-value">${suspect.profession}</span>
+                        </div>
+                        <div class="info-field">
+                            <span class="field-label">LOCATION:</span>
+                            <span class="field-value">${building.name}</span>
+                        </div>
+                        <div class="info-field">
+                            <span class="field-label">CAPTURES:</span>
+                            <span class="field-value">${captureCount}</span>
+                        </div>
+                        <div class="info-field">
+                            <span class="field-label">STATUS:</span>
+                            <span class="field-value">${isWanted ? 'AT LARGE' : 'PREVIOUSLY CAPTURED'}</span>
+                        </div>
+                    </div>
+                    <div class="reward-section">
+                        <div class="reward-label">BOUNTY REWARD</div>
+                        <div class="reward-amount ${isBonus ? 'bonus' : ''}">${currentReward}η</div>
+                    </div>
+                </div>
+            `;
+
+            // 長押しイベントを設定
+            setupLongPress(recordDiv, suspect);
+
+            return recordDiv;
+        }
+
+        function setupLongPress(element, suspect) {
+            element.addEventListener('mousedown', (e) => startLongPress(e, suspect));
+            element.addEventListener('mouseup', cancelLongPress);
+            element.addEventListener('mouseleave', cancelLongPress);
+            element.addEventListener('touchstart', (e) => startLongPress(e, suspect));
+            element.addEventListener('touchend', cancelLongPress);
+        }
+
+        function startLongPress(e, suspect) {
+            e.preventDefault();
+            currentSuspect = suspect;
+
+            // バイブレーション（サポートされている場合）
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+
+            // キャプチャープログレス表示
+            document.getElementById('captureProgress').style.display = 'block';
+            e.currentTarget.classList.add('capturing');
+
+            longPressTimer = setTimeout(() => {
+                captureSuspect(e.currentTarget);
+            }, 3000); // 3秒
+        }
+
+        function cancelLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            document.getElementById('captureProgress').style.display = 'none';
+            document.querySelectorAll('.suspect-record.capturing').forEach(el => {
+                el.classList.remove('capturing');
+            });
+        }
+
+        function captureSuspect(recordElement) {
+            if (!currentSuspect) return;
+
+            // バイブレーション
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+
+            // キャプチャープログレス更新
+            document.getElementById('captureProgress').innerHTML = 'CAPTURE CONFIRMED!<br><div style="margin-top: 1rem; font-size: 1rem;">UPDATING DATABASE...</div>';
+
+            setTimeout(() => {
+                // データ更新
+                const captureCount = capturedSuspects[currentSuspect.name] || 0;
+                
+                // 新しい報酬計算システム
+                let reward = Math.round(currentSuspect.reward * Math.pow(0.75, captureCount));
+                
+                // ボーナスタイム中は1.5倍
+                if (isBonusTarget(currentSuspect.name)) {
+                    reward = Math.round(reward * 1.5);
+                }
+                
+                capturedSuspects[currentSuspect.name] = captureCount + 1;
+                totalBounty += reward;
+
+                // ローカルストレージに保存
+                localStorage.setItem('capturedSuspects', JSON.stringify(capturedSuspects));
+                localStorage.setItem('totalBounty', totalBounty.toString());
+
+                // UI更新
+                updateBountyDisplay();
+                updateCaptureLog();
+                updateBountyChart();
+
+                // 検索をリセット
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchResults').classList.add('hidden');
+                document.getElementById('captureProgress').style.display = 'none';
+                recordElement.classList.remove('capturing');
+                currentSuspect = null;
+            }, 2000);
+        }
+
+        function updateBountyDisplay() {
+            document.getElementById('etaCount').textContent = totalBounty;
+            document.getElementById('totalAllTimeBounty').textContent = totalAllTimeBounty;
+        }
+
+        function updateCaptureLog() {
+            const captureLog = document.getElementById('captureLog');
+            captureLog.innerHTML = '';
+
+            if (Object.keys(capturedSuspects).length === 0) {
+                captureLog.innerHTML = '<div style="text-align: center; color: #555;">NO CAPTURES RECORDED</div>';
+                return;
+            }
+
+            Object.entries(capturedSuspects).forEach(([name, count]) => {
+                const suspect = suspects.find(s => s.name === name);
+                if (suspect) {
+                    const building = buildingInfo[suspect.building];
+                    const totalReward = calculateTotalReward(suspect.reward, count);
+                    
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `
+                        <span class="log-suspect">${building.emoji} ${suspect.alias} [${suspect.code}]</span>
+                        <span class="log-stats">CAPTURES: ${count} | TOTAL BOUNTY: ${totalReward}η</span>
+                    `;
+                    captureLog.appendChild(logEntry);
+                }
+            });
+        }
+
+        function calculateTotalReward(baseReward, captureCount) {
+            let total = 0;
+            for (let i = 0; i < captureCount; i++) {
+                // 新しい計算システム：0.75倍を適用
+                total += Math.round(baseReward * Math.pow(0.75, i));
+            }
+            return total;
+        }
+
+        function toggleDatabase() {
+            const databaseLog = document.getElementById('databaseLog');
+            if (databaseLog.style.display === 'none' || databaseLog.style.display === '') {
+                databaseLog.style.display = 'block';
+            } else {
+                databaseLog.style.display = 'none';
+            }
+        }
+
+        // データリセット機能（開発用）
+        function resetDatabase() {
+            if (confirm('RESET ALL DATABASE RECORDS?')) {
+                localStorage.clear();
+                capturedSuspects = {};
+                totalBounty = 0;
+                totalAllTimeBounty = 0;
+                bountyHistory = [{ time: new Date().toLocaleTimeString(), bounty: 0 }];
+                updateBountyDisplay();
+                updateCaptureLog();
+                updateBountyChart();
+            }
+        }
+
+        // デバッグ用：コンソールでresetDatabase()を実行してデータをリセット可能
+        window.resetDatabase = resetDatabase;
+    </script>
+</body>
+</html>
