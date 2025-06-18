@@ -20,6 +20,19 @@
             font-size: 14px;
         }
 
+        /* 建物アイコン用のスタイル */
+        .building-icon {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            filter: brightness(1.2);
+        }
+
+        .suspect-photo .building-icon {
+            width: 80px;
+            height: 80px;
+        }
+
         /* ログイン画面のスタイル */
         .login-screen {
             position: fixed;
@@ -557,6 +570,9 @@
 
         .log-suspect {
             color: #00ff00;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .log-stats {
@@ -581,6 +597,16 @@
             
             .reward-amount {
                 font-size: 1.5rem;
+            }
+
+            .building-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .suspect-photo .building-icon {
+                width: 60px;
+                height: 60px;
             }
         }
     </style>
@@ -669,7 +695,7 @@
         const suspects = [
             { code: "854251", name: "さむ", alias: "祭りのさむ", building: "PAPRIKA", profession: "船長", reward: 320745, runTime: 8, password: "さむさむ", activity: "裏フェス開催してるぞオラ！！！！" },
             { code: "166140", name: "なおき", alias: "風使いのなおき", building: "ROSEMARY", profession: "船長", reward: 322872, runTime: 7, password: "4477", activity: "屋久島の塩、バドミントン、クリケット" },
-            { code: "772893", name: "海老川舜悟🎖️", alias: "疾風の海老川舜悟", building: "BASIL", profession: "盗賊", reward: 385000, runTime: 6, password: "985", activity: "走りまくってる" },
+            { code: "772893", name: "海老川舜悟", alias: "'バグ'疾風の海老川舜悟🎖️", building: "BASIL", profession: "盗賊", reward: 385000, runTime: 6, password: "985", activity: "走りまくってる" },
             { code: "523243", name: "こよ", alias: "蹴球のこよ", building: "PAPRIKA", profession: "船長", reward: 324362, runTime: 6.7, password: "Unlock", activity: "サッカー、勉強" },
             { code: "924427", name: "あつし", alias: "筋肉のあつし", building: "BASIL", profession: "暗殺者", reward: 318085, runTime: 7.5, password: "1548", activity: "ゲーム" },
             { code: "491658", name: "さとつば", alias: "重力超越のさとつば", building: "BASIL", profession: "戦士", reward: 313000, runTime: 8.5, password: "おれー", activity: "科学" },
@@ -677,11 +703,11 @@
             { code: "615720", name: "ゆうと", alias: "カタギのゆうと", building: "PAPRIKA", profession: "暗殺者", reward: 313000, runTime: 8.5, password: "カタギ", activity: "映画" },
             { code: "893465", name: "花", alias: "闘球の花", building: "PAPRIKA", profession: "盗賊", reward: 305489, runTime: 9, password: "ばなな", activity: "バドミントン" },
             { code: "208137", name: "はむ", alias: "白球のはむ", building: "BASIL", profession: "暗殺者", reward: 310000, runTime: 9, password: "1103", activity: "野球" },
-            { code: "572984", name: "のん", alias: "舞踊ののん", building: "TURMERIC", profession: "戦士", reward: 307000, runTime: 9.5, password: "ガールズしか勝たん", activity: "ダンス" },
+            { code: "572984", name: "のん", alias: "芸術家ののん", building: "TURMERIC", profession: "戦士", reward: 307000, runTime: 9.5, password: "ガールズしか勝たん", activity: "ダンス" },
             { code: "746251", name: "りりん", alias: "音霊のりりん", building: "TURMERIC", profession: "戦士", reward: 305000, runTime: 10, password: "げんはしか勝たん", activity: "楽器" },
             { code: "139678", name: "やふぁん", alias: "自由のやふぁん", building: "TURMERIC", profession: "盗賊", reward: 298085, runTime: 11, password: "女子しか勝たん", activity: "バイト" },
             { code: "684529", name: "ゆーみ", alias: "絵語りのゆーみ", building: "TURMERIC", profession: "盗賊", reward: 295106, runTime: 11.5, password: "ターメリックしかかたん", activity: "バイト、野球" },
-            { code: "357940", name: "松井晶瑞", alias: "自由の松井晶瑞", building: "BASIL", profession: "盗賊", reward: 290000, runTime: 12.5, password: "Duckduckgo", activity: "バドミントン" },
+            { code: "357940", name: "松井晶瑞", alias: "パーマの松井晶瑞", building: "BASIL", profession: "盗賊", reward: 290000, runTime: 12.5, password: "Duckduckgo", activity: "バドミントン" },
             { code: "821396", name: "き", alias: "賢者のき", building: "ROSEMARY", profession: "暗殺者", reward: 287234, runTime: 13, password: "ローズ", activity: "読書" },
             { code: "472815", name: "鈴木煌之介", alias: "熱気風呂の鈴木煌之介", building: "ROSEMARY", profession: "盗賊", reward: 284255, runTime: 13.5, password: "626", activity: "ゲーム" },
             { code: "698734", name: "リン", alias: "滑板のリン", building: "ROSEMARY", profession: "盗賊", reward: 281277, runTime: 14, password: "パスワード", activity: "バイト、映画" },
@@ -691,7 +717,7 @@
             { code: "435976", name: "みん", alias: "ベトナムのみん", building: "BASIL", profession: "盗賊", reward: 268383, runTime: 16.5, password: "Vatine", activity: "バイト" },
             { code: "169823", name: "りさ", alias: "雷光のりさ", building: "ROSEMARY", profession: "戦士", reward: 265404, runTime: 17, password: "514", activity: "テニス" },
             { code: "324718", name: "えのあ", alias: "音霊のえのあ", building: "TURMERIC", profession: "策士", reward: 252660, runTime: 20, password: "zzz", activity: "楽器" },
-            { code: "591284", name: "野中智貴", alias: "自由の野中智貴", building: "BASIL", profession: "策士", reward: 247745, runTime: 21.5, password: "1234", activity: "ゲーム" },
+            { code: "591284", name: "野中智貴", alias: "'海賊王'野中智貴", building: "BASIL", profession: "策士", reward: 247745, runTime: 21.5, password: "1234", activity: "ゲーム" },
             { code: "836597", name: "つぐ", alias: "ビートメーカーのつぐ", building: "BASIL", profession: "船長", reward: 240872, runTime: 24, password: "GITS", activity: "サークル" },
             { code: "479351", name: "こうや", alias: "雪風のこうや", building: "ROSEMARY", profession: "策士", reward: 230000, runTime: 30, password: "828", activity: "お酒" },
             { code: "142865", name: "ゆうか", alias: "樹影のゆうか", building: "ROSEMARY", profession: "盗賊", reward: 108000, runTime: 100, password: "Yuka", activity: "ゲーム" },
@@ -700,10 +726,22 @@
 
 
         const buildingInfo = {
-            "PAPRIKA": { emoji: "🌺", name: "PAPRIKA BLOCK" },
-            "ROSEMARY": { emoji: "🪻", name: "ROSEMARY BLOCK" },
-            "BASIL": { emoji: "🌿", name: "BASIL BLOCK" },
-            "TURMERIC": { emoji: "🌼", name: "TURMERIC BLOCK" },
+            "PAPRIKA": { 
+                imageUrl: "https://raw.githubusercontent.com/Rhizobium-gits/HUraFES/main/2025-06-19_1.49の画像-removebg-preview.png", 
+                name: "PAPRIKA BLOCK" 
+            },
+            "ROSEMARY": { 
+                imageUrl: "https://raw.githubusercontent.com/Rhizobium-gits/HUraFES/main/2025-06-19_1.49の画像-removebg-preview-2.png", 
+                name: "ROSEMARY BLOCK" 
+            },
+            "BASIL": { 
+                imageUrl: "https://raw.githubusercontent.com/Rhizobium-gits/HUraFES/main/2025-06-19_1.49の画像-removebg-preview-3.png", 
+                name: "BASIL BLOCK" 
+            },
+            "TURMERIC": { 
+                imageUrl: "https://raw.githubusercontent.com/Rhizobium-gits/HUraFES/main/2025-06-19_1.49の画像-removebg-preview-4.png", 
+                name: "TURMERIC BLOCK" 
+            },
         };
 
         let currentUser = null;
@@ -1046,7 +1084,7 @@
                 </div>
                 <div class="record-content">
                     <div class="suspect-photo">
-                        ${building.emoji}
+                        <img src="${building.imageUrl}" alt="${building.name}" class="building-icon" />
                     </div>
                     <div class="suspect-info">
                         <div class="info-field">
@@ -1187,7 +1225,10 @@
                     const logEntry = document.createElement('div');
                     logEntry.className = 'log-entry';
                     logEntry.innerHTML = `
-                        <span class="log-suspect">${building.emoji} ${suspect.alias} [${suspect.code}]</span>
+                        <span class="log-suspect">
+                            <img src="${building.imageUrl}" alt="${building.name}" class="building-icon" style="width: 20px; height: 20px;" />
+                            ${suspect.alias} [${suspect.code}]
+                        </span>
                         <span class="log-stats">CAPTURES: ${count} | TOTAL BOUNTY: ${totalReward}η</span>
                     `;
                     captureLog.appendChild(logEntry);
